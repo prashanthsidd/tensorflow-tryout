@@ -6,7 +6,7 @@ from keras.applications import VGG16
 from util.BilinearUpSampling import BilinearUpSampling2D 
 from util.Cropping import crop
 
-def DD_2s(weights, input_shape=(64,64,3), n_classes=2):
+def DDs(weights, input_shape=(64,64,3), n_classes=2):
 
   #Input shape
   if input_shape is not None:
