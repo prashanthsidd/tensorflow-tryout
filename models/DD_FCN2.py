@@ -6,7 +6,7 @@ from keras.applications import VGG16
 from util.BilinearUpSampling import BilinearUpSampling2D 
 from util.Cropping import crop
 
-def DD_16s(weights, input_shape=(64,64,3), n_classes=2):
+def DD_2s(weights, input_shape=(64,64,3), n_classes=2):
 
   #Input shape
   if input_shape is not None:
@@ -44,15 +44,18 @@ def DD_16s(weights, input_shape=(64,64,3), n_classes=2):
   x = Conv2D(512, (3,3), activation='relu', padding='same', name='block5_conv2')(x)
   x = Conv2D(512, (3,3), activation='relu', padding='same', name='block5_conv3')(x)
   x = MaxPool2D(strides=(2,2), name='block5_pool')(x)
-#   p5 = x
+  p5 = x
 
   #FC layers as convolutional layers
   x = Conv2D(1000, (2,2), activation='relu', padding='same', name='dense_1', kernel_regularizer=l2(0.001))(x)
   x = Conv2D(500, (1,1), activation='relu', padding='same', name='dense_2', kernel_regularizer=l2(0.001))(x)
+  
+  #32s
   x = Conv2D(n_classes, (1,1), activation='linear', padding='valid', name='dense', kernel_initializer='he_normal')(x)
   
   o = BilinearUpSampling2D(size=(2,2))(x)
   
+  #16s
   o2 = p4
   
   o2 = Conv2D(n_classes, (1,1), kernel_initializer='he_normal')(o2)
@@ -61,10 +64,44 @@ def DD_16s(weights, input_shape=(64,64,3), n_classes=2):
   
   o = Add()([o,o2])
   
-  o = BilinearUpSampling2D(size=(16,16,))(o)
+  o = BilinearUpSampling2D(size=(2,2))(o)
+  
+  #8s 
+  o2 = p3
+  
+  o2 = Conv2D(n_classes, (1,1), kernel_initializer='he_normal')(o2)
+  
+  o2, o = crop(o2,o, img_inp)
+	
+  o = Add()([o,o2])
+  
+  o = BilinearUpSampling2D(size=(2,2))(o)
+  
+  #4s
+  o2 = p2
+  
+  o2 = Conv2D(n_classes, (1,1), kernel_initializer='he_normal')(o2)
+  
+  o2, o = crop(o2,o, img_inp)
+	
+  o = Add()([o,o2])
+  
+  o = BilinearUpSampling2D(size=(2,2))(o)
+  
+  #2s
+  o2 = p1
+  
+  o2 = Conv2D(n_classes, (1,1), kernel_initializer='he_normal')(o2)
+  
+  o2, o = crop(o2,o, img_inp)
+	
+  o = Add()([o,o2])
+  
+  o = BilinearUpSampling2D(size=(2,2))(o)
+  
   
   o_shape = Model(img_inp , o ).output_shape
-	
+  
   print("output shape is {}".format(o_shape))
   
   output_height = o_shape[2]
@@ -78,6 +115,6 @@ def DD_16s(weights, input_shape=(64,64,3), n_classes=2):
   model.outputHeight = output_height
   
   if(weights is not None):
-    model.load_weights(weights, by_name=True,reshape=True)
+    model.load_weights(weights, by_name=True,)
     
   return model
