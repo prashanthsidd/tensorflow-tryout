@@ -7,7 +7,7 @@ from util.BilinearUpSampling import BilinearUpSampling2D
 from util.Cropping import crop
 
 def DDs(weights, input_shape=(64,64,3), n_classes=2):
-  print("Hello world!")
+  print("Hello world123!")
   #Input shape
   if input_shape is not None:
     img_inp = Input(shape=input_shape, name='input_1')
